@@ -1,6 +1,5 @@
 package com.practice.cleanarichitecturehandson.buckpal.account.domain;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +16,7 @@ public class Activity {
     private final LocalDateTime timestamp;
     private final Money money;
 
-    @Builder
+
     public Activity(AccountId ownerAccountId,
                     AccountId sourceAccountId,
                     AccountId targetAccountId,
