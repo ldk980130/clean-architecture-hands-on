@@ -13,6 +13,10 @@ public class Account {
     private final Money baselineBalance;
     private final ActivityWindow activityWindow;
 
+    public static Account withId(AccountId id, Money baselineBalance, ActivityWindow activityWindow) {
+        return new Account(id, baselineBalance, activityWindow);
+    }
+
     public Money calculateBalance() {
         return Money.add(
                 this.baselineBalance,

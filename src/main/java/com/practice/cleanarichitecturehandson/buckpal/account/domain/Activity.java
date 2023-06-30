@@ -25,4 +25,11 @@ public class Activity {
     ) {
         this(null, ownerAccountId, sourceAccountId, targetAccountId, timestamp, money);
     }
+
+    public boolean isSourceAccountId(AccountId accountId) {
+        return this.sourceAccountId.equals(accountId);
+    }
+    public boolean isTargetAccountId(AccountId accountId) {
+        return this.targetAccountId.equals(accountId);
+    }
 }
