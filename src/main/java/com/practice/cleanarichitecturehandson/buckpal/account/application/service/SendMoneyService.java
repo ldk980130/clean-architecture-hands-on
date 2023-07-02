@@ -5,8 +5,13 @@ import com.practice.cleanarichitecturehandson.buckpal.account.application.port.i
 import com.practice.cleanarichitecturehandson.buckpal.account.application.port.out.AccountLock;
 import com.practice.cleanarichitecturehandson.buckpal.account.application.port.out.LoadAccountPort;
 import com.practice.cleanarichitecturehandson.buckpal.account.application.port.out.UpdateAccountStatePort;
+import com.practice.cleanarichitecturehandson.buckpal.account.domain.Account;
+import com.practice.cleanarichitecturehandson.buckpal.account.domain.AccountId;
+import com.practice.cleanarichitecturehandson.buckpal.account.domain.Money;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Transactional
@@ -18,8 +23,35 @@ public class SendMoneyService implements SendMoneyUseCase {
 
     @Override
     public boolean sendMoney(SendMoneyCommand command) {
-        // 비즈니스 규칙 검증
-        // 모델 상태 조작
+        LocalDateTime baselineDate = LocalDateTime.now().minusDays(10);
+        Account sourceAccount = loadAccountPort.loadAccount(
+                command.sourceAccountId(),
+                baselineDate
+        );
+        Account targetAccount = loadAccountPort.loadAccount(
+                command.targetAccountId(),
+                baselineDate
+        );
+        return send(sourceAccount, targetAccount, command.money());
+    }
+
+    private boolean send(Account sourceAccount, Account targetAccount, Money money) {
+        AccountId sourceAccountId = sourceAccount.getId();
+        AccountId targetAccountId = targetAccount.getId();
+        accountLock.lockAccount(sourceAccountId);
+        if (!sourceAccount.withdraw(money, targetAccountId)) {
+            accountLock.releaseAccount(sourceAccountId);
+            return false;
+        }
+        accountLock.lockAccount(targetAccountId);
+        if (!targetAccount.deposit(money, sourceAccountId)) {
+            accountLock.releaseAccount(targetAccountId);
+            return false;
+        }
+        updateAccountStatePort.updateActivities(sourceAccount);
+        updateAccountStatePort.updateActivities(targetAccount);
+        accountLock.releaseAccount(sourceAccountId);
+        accountLock.releaseAccount(targetAccountId);
         return true;
     }
 }
