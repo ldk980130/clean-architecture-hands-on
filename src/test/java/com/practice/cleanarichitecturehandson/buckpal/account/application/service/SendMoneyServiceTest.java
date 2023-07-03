@@ -49,9 +49,9 @@ class SendMoneyServiceTest {
         givenDepositWillSucceed(targetAccount);
 
         SendMoneyCommand command = new SendMoneyCommand(
-                sourceAccountId,
-                targetAccountId,
-                Money.of(300L));
+                41L,
+                42L,
+                300L);
 
         boolean success = sendMoneyService.sendMoney(command);
 
@@ -71,12 +71,13 @@ class SendMoneyServiceTest {
         givenWithdrawalWillSucceed(sourceAccount);
         givenDepositWillSucceed(targetAccount);
 
-        Money money = Money.of(500L);
+        long amount = 500L;
+        Money money = Money.of(amount);
 
         SendMoneyCommand command = new SendMoneyCommand(
-                sourceAccount.getId(),
-                targetAccount.getId(),
-                money
+                sourceAccount.getId().id(),
+                targetAccount.getId().id(),
+                amount
         );
 
         boolean success = sendMoneyService.sendMoney(command);

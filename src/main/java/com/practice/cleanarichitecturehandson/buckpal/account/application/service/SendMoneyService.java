@@ -9,11 +9,13 @@ import com.practice.cleanarichitecturehandson.buckpal.account.domain.Account;
 import com.practice.cleanarichitecturehandson.buckpal.account.domain.AccountId;
 import com.practice.cleanarichitecturehandson.buckpal.account.domain.Money;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
+@Service
 @Transactional
 public class SendMoneyService implements SendMoneyUseCase {
 
@@ -25,14 +27,14 @@ public class SendMoneyService implements SendMoneyUseCase {
     public boolean sendMoney(SendMoneyCommand command) {
         LocalDateTime baselineDate = LocalDateTime.now().minusDays(10);
         Account sourceAccount = loadAccountPort.loadAccount(
-                command.sourceAccountId(),
+                new AccountId(command.sourceAccountId()),
                 baselineDate
         );
         Account targetAccount = loadAccountPort.loadAccount(
-                command.targetAccountId(),
+                new AccountId(command.targetAccountId()),
                 baselineDate
         );
-        return send(sourceAccount, targetAccount, command.money());
+        return send(sourceAccount, targetAccount, Money.of(command.amount()));
     }
 
     private boolean send(Account sourceAccount, Account targetAccount, Money money) {

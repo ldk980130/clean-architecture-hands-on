@@ -1,17 +1,16 @@
 package com.practice.cleanarichitecturehandson.buckpal.account.application.port.in;
 
-import com.practice.cleanarichitecturehandson.buckpal.account.domain.AccountId;
-import com.practice.cleanarichitecturehandson.buckpal.account.domain.Money;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record SendMoneyCommand(
         @NotNull
-        AccountId sourceAccountId,
+        Long sourceAccountId,
 
         @NotNull
-        AccountId targetAccountId,
+        Long targetAccountId,
 
-        @NotNull
-        Money money
+        @Positive
+        Long amount
 ) {
 }
