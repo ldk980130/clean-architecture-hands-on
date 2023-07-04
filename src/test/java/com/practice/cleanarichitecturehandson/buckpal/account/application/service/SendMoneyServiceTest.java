@@ -75,8 +75,8 @@ class SendMoneyServiceTest {
         Money money = Money.of(amount);
 
         SendMoneyCommand command = new SendMoneyCommand(
-                sourceAccount.getId().id(),
-                targetAccount.getId().id(),
+                sourceAccount.getId().value(),
+                targetAccount.getId().value(),
                 amount
         );
 
