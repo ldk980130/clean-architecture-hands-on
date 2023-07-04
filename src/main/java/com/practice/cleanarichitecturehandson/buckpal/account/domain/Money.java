@@ -15,6 +15,10 @@ public record Money(BigInteger amount) {
         return new Money(BigInteger.valueOf(amount));
     }
 
+    public static Money subtract(Money money1, Money money2) {
+        return new Money(money1.amount.subtract(money2.amount));
+    }
+
     public Money negate() {
         return new Money(this.amount.negate());
     }

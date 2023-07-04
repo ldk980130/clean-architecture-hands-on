@@ -15,6 +15,11 @@ public class ActivityWindow {
         this.activities = new ArrayList<>(Arrays.asList(activities));
     }
 
+    public ActivityWindow(List<Activity> activities) {
+        this.activities = new ArrayList<>(activities);
+    }
+
+
     public Money calculateBalance(AccountId accountId) {
         Money depositBalance = activities.stream()
                 .filter(activity -> activity.isTargetAccountId(accountId))
