@@ -8,8 +8,9 @@ import com.practice.cleanarichitecturehandson.buckpal.account.domain.Account;
 import com.practice.cleanarichitecturehandson.buckpal.account.domain.AccountId;
 import com.practice.cleanarichitecturehandson.buckpal.account.domain.Money;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,25 +21,27 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 
+@ExtendWith(MockitoExtension.class)
 class SendMoneyServiceTest {
 
-    private final LoadAccountPort loadAccountPort =
-            Mockito.mock(LoadAccountPort.class);
+    @Mock
+    private LoadAccountPort loadAccountPort;
 
-    private final AccountLock accountLock =
-            Mockito.mock(AccountLock.class);
+    @Mock
+    private AccountLock accountLock;
 
-    private final UpdateAccountStatePort updateAccountStatePort =
-            Mockito.mock(UpdateAccountStatePort.class);
+    @Mock
+    private UpdateAccountStatePort updateAccountStatePort;
 
-    private final SendMoneyService sendMoneyService =
-            new SendMoneyService(loadAccountPort, accountLock, updateAccountStatePort);
+    @InjectMocks
+    private SendMoneyService sendMoneyService;
 
     @Test
     void givenWithdrawalFails_thenOnlySourceAccountIsLockedAndReleased() {
-
+        // given
         AccountId sourceAccountId = new AccountId(41L);
         Account sourceAccount = givenAnAccountWithId(sourceAccountId);
 
@@ -48,15 +51,13 @@ class SendMoneyServiceTest {
         givenWithdrawalWillFail(sourceAccount);
         givenDepositWillSucceed(targetAccount);
 
-        SendMoneyCommand command = new SendMoneyCommand(
-                41L,
-                42L,
-                300L);
+        SendMoneyCommand command = new SendMoneyCommand(41L, 42L, 300L);
 
+        // when
         boolean success = sendMoneyService.sendMoney(command);
 
+        // then
         assertThat(success).isFalse();
-
         then(accountLock).should().lockAccount(eq(sourceAccountId));
         then(accountLock).should().releaseAccount(eq(sourceAccountId));
         then(accountLock).should(times(0)).lockAccount(eq(targetAccountId));
@@ -64,7 +65,7 @@ class SendMoneyServiceTest {
 
     @Test
     void transactionSucceeds() {
-
+        // given
         Account sourceAccount = givenSourceAccount();
         Account targetAccount = givenTargetAccount();
 
@@ -80,8 +81,10 @@ class SendMoneyServiceTest {
                 amount
         );
 
+        // when
         boolean success = sendMoneyService.sendMoney(command);
 
+        // then
         assertThat(success).isTrue();
 
         AccountId sourceAccountId = sourceAccount.getId();
@@ -114,18 +117,18 @@ class SendMoneyServiceTest {
     }
 
     private void givenDepositWillSucceed(Account account) {
-        given(account.deposit(any(Money.class), any(AccountId.class)))
-                .willReturn(true);
+        lenient().doReturn(true)
+                        .when(account).deposit(any(Money.class), any(AccountId.class));
     }
 
     private void givenWithdrawalWillFail(Account account) {
-        given(account.withdraw(any(Money.class), any(AccountId.class)))
-                .willReturn(false);
+        lenient().doReturn(false)
+                .when(account).withdraw(any(Money.class), any(AccountId.class));
     }
 
     private void givenWithdrawalWillSucceed(Account account) {
-        given(account.withdraw(any(Money.class), any(AccountId.class)))
-                .willReturn(true);
+        lenient().doReturn(true)
+                .when(account).withdraw(any(Money.class), any(AccountId.class));
     }
 
     private Account givenTargetAccount() {
@@ -138,8 +141,7 @@ class SendMoneyServiceTest {
 
     private Account givenAnAccountWithId(AccountId id) {
         Account account = Mockito.mock(Account.class);
-        given(account.getId())
-                .willReturn(id);
+        given(account.getId()).willReturn(id);
         given(loadAccountPort.loadAccount(eq(account.getId()), any(LocalDateTime.class)))
                 .willReturn(account);
         return account;
