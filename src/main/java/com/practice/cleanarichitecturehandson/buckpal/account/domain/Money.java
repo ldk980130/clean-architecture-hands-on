@@ -23,7 +23,15 @@ public record Money(BigInteger amount) {
         return new Money(this.amount.negate());
     }
 
-    public boolean isPositive() {
-        return this.amount.compareTo(BigInteger.ZERO) > 0;
+    public boolean isPositiveOrZero() {
+        return this.amount.compareTo(BigInteger.ZERO) >= 0;
+    }
+
+    public Money minus(Money money){
+        return new Money(this.amount.subtract(money.amount));
+    }
+
+    public Money plus(Money money) {
+        return new Money(this.amount.add(money.amount));
     }
 }
